@@ -1,0 +1,30 @@
+Sub SendEmailFromExcel()
+
+Dim EApp As Outlook.Application
+Set EApp = New Outlook.Application
+Dim EItem As Outlook.MailItem
+Set EItem = EApp.CreateItem(olMailItem)
+Dim path As String
+Dim strbody
+path = "\" 'put your path here
+Dim RList As Range
+Set RList = Range("A2", Range("a2").End(xlDown))
+Dim R As Range
+
+    strbody = "<p >template</p>" 
+
+
+For Each R In RList
+    Set EItem = EApp.CreateItem(0)
+        With EItem
+        .SentOnBehalfOfName = ("team_email")
+        .To = R.Offset(0, 1)
+        .Subject = R.Offset(0, 0)
+        .Attachments.Add (path & R.Offset(0, 3) + ".pdf")
+        .Display
+        .HTMLBody = strbody & .HTMLBody
+End With
+Next R
+Set EApp = Nothing
+Set EItem = Nothing
+End Sub
