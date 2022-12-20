@@ -6,25 +6,53 @@ Dim EItem As Outlook.MailItem
 Set EItem = EApp.CreateItem(olMailItem)
 Dim path As String
 Dim strbody
-path = "\" 'put your path here
+path = "" 'put your path here and dont foget to put \ at the end to access inside of the folder, this is where all the .pdfs are located
 Dim RList As Range
-Set RList = Range("A2", Range("a2").End(xlDown))
+Set RList = Range("A2", Range("A" & Rows.Count).End(xlUp))
 Dim R As Range
+Dim foundfile As String, newfilename As String, TempPath As String
 
-    strbody = "<p >template</p>" 
+        strbody = "<p> TEMPLATE HERE </p>" & _  'if you want new line of text you have to use & _ at the end of every line.
 
+
+TempPath = "" 'put your path for the TEMP FODLDER here and dont foget to put \ at the end to access inside of the folder, this wehere it copies from the first folder and renames it
+If Right(path, 1) <> "\" Then path = path & "\"
 
 For Each R In RList
-    Set EItem = EApp.CreateItem(0)
+
+    'Find file that starts with number
+    foundfile = Dir(path & R.Offset(0, 3) & "*.pdf") ' it assumes that the search value by which we find the .pdf is in the 4th collum D
+    
+    'if file is found then..
+    If foundfile <> "" Then
+        'create new filename that excludes number
+        newfilename = Mid(foundfile, InStr(foundfile, "_") + 1)
+        
+        'if file already exists in temp location, delete it
+        If Dir(TempPath & newfilename) <> "" Then Kill TempPath & newfilename
+        
+        'create copy of file with short name in temp location
+        FileCopy path & foundfile, TempPath & newfilename
+        
+        Set EItem = EApp.CreateItem(0)
         With EItem
-        .SentOnBehalfOfName = ("team_email")
-        .To = R.Offset(0, 1)
-        .Subject = R.Offset(0, 0)
-        .Attachments.Add (path & R.Offset(0, 3) + ".pdf")
-        .Display
-        .HTMLBody = strbody & .HTMLBody
-End With
+            .SentOnBehalfOfName = ("Team_email@xx.xxx") 'put your team email here, if you don't need it just remove this line.
+            .To = R.Offset(0, 1) 'it assumes that the emails are second collum B
+            .Subject = R.Offset(0, 0) 'it assumes that the subject is in first collum A
+            ' add attachment from temp location
+            .Attachments.Add (TempPath & newfilename)
+            .Display
+            .HTMLBody = strbody & .HTMLBody
+        End With
+        'remove temporary copy
+        Kill TempPath & newfilename
+    Else
+        'File not found
+    End If
+    
 Next R
 Set EApp = Nothing
 Set EItem = Nothing
 End Sub
+
+'CREDITS FOR THE CODE: https://stackoverflow.com/questions/74863138/rename-a-file-before-attaching-it-to-outlook-email?noredirect=1#comment132124485_74863138
