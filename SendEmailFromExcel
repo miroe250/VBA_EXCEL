@@ -1,3 +1,6 @@
+
+'CREDITS FOR THE CODE: https://stackoverflow.com/questions/74863138/rename-a-file-before-attaching-it-to-outlook-email?noredirect=1#comment132124485_74863138
+
 Sub SendEmailFromExcel()
 
 Dim EApp As Outlook.Application
